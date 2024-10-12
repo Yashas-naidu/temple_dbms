@@ -1,0 +1,20 @@
+.spinner {
+    border: 6px solid rgba(255, 255, 255, 0.3);  /* Adjust border thickness */
+    border-left-color: #ffffff;  /* Adjust spinner color */
+    border-radius: 50%;
+    width: 50px;  /* Increase size */
+    height: 50px;  /* Increase size */
+    animation: spin 1s linear infinite;
+  }
+  
+  
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
