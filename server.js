@@ -75,13 +75,17 @@ app.post('/api/signin', (req, res) => {
 
 // Example route for bookings
 app.post('/api/bookings', (req, res) => {
-  const { temple, bookingType, checkIn, checkOut, numberOfDays, date, timeSlot } = req.body;
-  const query = 'INSERT INTO bookings (temple, bookingType, checkIn, checkOut, numberOfDays, date, timeSlot) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(query, [temple, bookingType, checkIn, checkOut, numberOfDays, date, timeSlot], (err, result) => {
-    if (err) throw err;
-    res.send('Booking created');
+  const { temple, bookingType, serviceType, date, timeSlot } = req.body; // Updated to match the new schema
+  const query = 'INSERT INTO bookings (temple, bookingType, serviceType, date, timeSlot) VALUES (?, ?, ?, ?, ?)'; // Updated SQL query
+  db.query(query, [temple, bookingType, serviceType, date, timeSlot], (err, result) => { // Include serviceType in the parameters
+    if (err) {
+      console.error("Error creating booking:", err);
+      return res.status(500).send('Error creating booking'); // Improved error handling
+    }
+    res.status(201).send('Booking created'); // Send a 201 status code for successful creation
   });
 });
+
 
 // Example route for donations
 app.post('/api/donations', (req, res) => {
@@ -90,6 +94,19 @@ app.post('/api/donations', (req, res) => {
   db.query(query, [name, phone, address, donationType, donationAmount], (err, result) => {
     if (err) throw err;
     res.send('Donation received');
+  });
+});
+
+app.post("/events", (req, res) => {
+  const { event, numberOfAttendees } = req.body;
+
+  const query = "INSERT INTO events (event, numberOfAttendees) VALUES (?, ?)";
+  db.query(query, [event, numberOfAttendees], (err, result) => {
+      if (err) {
+          console.error("Error inserting data: ", err);
+          return res.status(500).send("Error inserting data");
+      }
+      res.status(200).send("Event registration successful!");
   });
 });
 
