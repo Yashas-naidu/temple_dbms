@@ -25,7 +25,7 @@ db.connect((err) => {
 
 // SIGN UP route
 app.post('/api/signup', async (req, res) => {
-  const { username, email, password, phone, address } = req.body;  // Destructure additional fields
+  const { username, email, password, phone, address } = req.body;
 
   // Check if user already exists
   const checkUserQuery = 'SELECT * FROM users WHERE email = ?';
@@ -48,7 +48,7 @@ app.post('/api/signup', async (req, res) => {
   });
 });
 
-// SIGN IN route
+// SIGN IN route with session recording
 app.post('/api/signin', (req, res) => {
   const { email, password } = req.body;
 
@@ -68,24 +68,31 @@ app.post('/api/signin', (req, res) => {
         return res.status(400).send('Invalid credentials');
       }
 
-      res.send('Sign in successful');
+      // Insert sign-in details into the session table
+      const sessionQuery = 'INSERT INTO session (user_id, sign_in_time) VALUES (?, NOW())';
+      db.query(sessionQuery, [user.id], (err, sessionResult) => {
+        if (err) {
+          console.error("Error inserting session data:", err);
+          return res.status(500).send('Error creating session');
+        }
+        res.send('Sign in successful');
+      });
     }
   });
 });
 
 // Example route for bookings
 app.post('/api/bookings', (req, res) => {
-  const { temple, bookingType, serviceType, date, timeSlot } = req.body; // Updated to match the new schema
-  const query = 'INSERT INTO bookings (temple, bookingType, serviceType, date, timeSlot) VALUES (?, ?, ?, ?, ?)'; // Updated SQL query
-  db.query(query, [temple, bookingType, serviceType, date, timeSlot], (err, result) => { // Include serviceType in the parameters
+  const { temple, bookingType, serviceType, date, timeSlot } = req.body;
+  const query = 'INSERT INTO bookings (temple, bookingType, serviceType, date, timeSlot) VALUES (?, ?, ?, ?, ?)';
+  db.query(query, [temple, bookingType, serviceType, date, timeSlot], (err, result) => {
     if (err) {
       console.error("Error creating booking:", err);
-      return res.status(500).send('Error creating booking'); // Improved error handling
+      return res.status(500).send('Error creating booking');
     }
-    res.status(201).send('Booking created'); // Send a 201 status code for successful creation
+    res.status(201).send('Booking created');
   });
 });
-
 
 // Example route for donations
 app.post('/api/donations', (req, res) => {
@@ -97,9 +104,9 @@ app.post('/api/donations', (req, res) => {
   });
 });
 
+// Event registration route
 app.post("/events", (req, res) => {
   const { event, numberOfAttendees } = req.body;
-
   const query = "INSERT INTO events (event, numberOfAttendees) VALUES (?, ?)";
   db.query(query, [event, numberOfAttendees], (err, result) => {
       if (err) {
@@ -109,6 +116,32 @@ app.post("/events", (req, res) => {
       res.status(200).send("Event registration successful!");
   });
 });
+
+// Endpoint to get the latest session
+app.get('/api/session/latest', (req, res) => {
+  const query = `
+    SELECT session.*, users.username, users.email, users.phone, users.address
+    FROM session
+    JOIN users ON session.user_id = users.id
+    ORDER BY session.sign_in_time DESC
+    LIMIT 1
+  `;
+  
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error fetching session data');
+    }
+    
+    if (result.length === 0) {
+      return res.status(404).send('No session data found');
+    }
+    
+    res.json(result[0]);
+  });
+});
+
+
 
 // Start server
 app.listen(port, () => {

@@ -1,0 +1,14 @@
+/* TempleServicesDashboard.css */
+
+.animated-bg {
+    background: linear-gradient(-30deg, #0008ff, #96eeff, #36b2ff, #64b9eb);
+    background-size: 400% 400%;
+    animation: gradientMove 8s ease infinite;
+  }
+  
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  

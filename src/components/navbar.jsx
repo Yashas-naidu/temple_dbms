@@ -75,16 +75,16 @@ function Navbar() {
           Your browser does not support the video tag.
         </video>
         <div className="relative z-10 text-center">
-          <h1 className="text-6xl font-bold mb-4">Welcome to TempleTrek</h1>
-          <p className="text-2xl mb-6">Your gateway to spiritual journeys and temple visits.</p>
-          <Link
+          {/* <h1 className="text-6xl font-bold mb-4">Welcome to TempleTrek</h1>
+          <p className="text-2xl mb-6">Your gateway to spiritual journeys and temple visits.</p> */}
+          {/* <Link
             to="about"
             smooth={true}
             duration={1000}
             className="bg-white text-blue-800 py-3 px-6 rounded hover:bg-gray-200 text-2xl cursor-pointer"
           >
             Learn More
-          </Link>
+          </Link> */}
         </div>
       </section>
     </div>
