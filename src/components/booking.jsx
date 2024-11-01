@@ -1,52 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
 import axios from "axios";
+import { useCart } from "./cartcontext";
 
 function Booking() {
   const [showPopup, setShowPopup] = useState(false);
-  const [notificationVisible, setNotificationVisible] = useState(false); // State for notification
+  const [notificationVisible, setNotificationVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState("");
-  const [numberOfAttendees, setNumberOfAttendees] = useState(1);
   const [bookingType, setBookingType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [numberOfDays, setNumberOfDays] = useState(0);
+  const { addToCart } = useCart();
 
-  const handleOpenPopup = () => setShowPopup(true);
-  const handleClosePopup = () => setShowPopup(false);
+  // Constant for daily rate
+  const dailyRate = 500;
 
-  const handleSubmit = (e) => {
+  // Effect to calculate the number of days based on selected dates
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const differenceInTime = end.getTime() - start.getTime();
+      const days = Math.ceil(differenceInTime / (1000 * 3600 * 24)); // Convert milliseconds to days
+      setNumberOfDays(days < 0 ? 0 : days); // Ensure no negative days
+    }
+  }, [startDate, endDate]);
+
+  // Handle form submission
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    console.log(`Event: ${selectedEvent}, Number of Attendees: ${numberOfAttendees}`);
-    handleClosePopup();
-  };
+    // Check if start date is after end date
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date cannot be after end date.");
+      return;
+    }
 
-  const handlebookingSubmit = async (e) => {
-    e.preventDefault();
-    
     const bookingData = {
       temple: e.target.temple.value,
       bookingType,
-      date: e.target.date?.value,
-      timeSlot: e.target["time-slot"]?.value,
-      serviceType: e.target.serviceType?.value,
+      startDate,
+      endDate,
+      amount: numberOfDays * dailyRate, // Calculate total amount
     };
-
-    // Validate required fields
-    if (!bookingData.temple || !bookingData.bookingType || !bookingData.date || !bookingData.timeSlot || (bookingType === "services" && !bookingData.serviceType)) {
-      alert("Please fill out all required fields.");
-      return; // Prevent submission
-    }
 
     try {
       await axios.post("http://localhost:5000/api/bookings", bookingData);
-      console.log("Booking created");
-      setNotificationVisible(true); // Show notification on successful submission
-      handleClosePopup();
-
-      // Hide notification after 3 seconds
-      setTimeout(() => {
-        setNotificationVisible(false);
-      }, 3000);
+      addToCart({
+        type: 'booking', // Specify the type of cart item
+        bookingType,
+        amount: numberOfDays * dailyRate, // Add amount correctly
+      });
+      setNotificationVisible(true);
+      setTimeout(() => setNotificationVisible(false), 3000);
     } catch (error) {
       console.error("Error creating booking", error);
+      alert("Error creating booking. Please try again."); // Inform user of error
     }
   };
 
@@ -59,7 +68,7 @@ function Booking() {
         </p>
         <div className="bg-white p-8 rounded-lg shadow-md">
           <h3 className="text-3xl font-bold mb-4">Book Your Visit</h3>
-          <form onSubmit={handlebookingSubmit} className="flex flex-col items-center">
+          <form onSubmit={handleBookingSubmit} className="flex flex-col items-center">
             <div className="mb-4 w-full max-w-md">
               <label htmlFor="temple" className="block text-left text-xl font-semibold mb-2">Select Temple</label>
               <select
@@ -91,87 +100,54 @@ function Booking() {
             </div>
 
             {/* Conditional rendering based on booking type */}
-            {bookingType === "services" && (
+            {bookingType && (
               <>
                 <div className="mb-4 w-full max-w-md">
-                  <label htmlFor="service-type" className="block text-left text-xl font-semibold mb-2">Select Service</label>
-                  <select
-                    id="service-type"
-                    name="serviceType"
-                    className="w-full p-3 border border-gray-300 rounded"
-                    required={bookingType === "services"} // Make this required if bookingType is services
-                  >
-                    <option value="">Select Service</option>
-                    <option value="special-pooja">Special Pooja</option>
-                    <option value="abhishekas">Abhishekas</option>
-                  </select>
-                </div>
-
-                <div className="mb-4 w-full max-w-md">
-                  <label htmlFor="date" className="block text-left text-xl font-semibold mb-2">Date</label>
+                  <label htmlFor="start-date" className="block text-left text-xl font-semibold mb-2">Start Date</label>
                   <input
-                    id="date"
+                    id="start-date"
                     type="date"
-                    name="date"
+                    name="start-date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
                     className="w-full p-3 border border-gray-300 rounded"
                     required
                   />
                 </div>
 
                 <div className="mb-4 w-full max-w-md">
-                  <label htmlFor="time-slot" className="block text-left text-xl font-semibold mb-2">Select Time Slot</label>
-                  <select
-                    id="time-slot"
-                    name="time-slot"
-                    className="w-full p-3 border border-gray-300 rounded"
-                    required
-                  >
-                    <option value="08:00-10:00">08:00 AM - 10:00 AM</option>
-                    <option value="10:00-12:00">10:00 AM - 12:00 PM</option>
-                    <option value="12:00-02:00">12:00 PM - 02:00 PM</option>
-                    <option value="02:00-04:00">02:00 PM - 04:00 PM</option>
-                    <option value="04:00-06:00">04:00 PM - 06:00 PM</option>
-                  </select>
-                </div>
-              </>
-            )}
-            {bookingType === "darshana" && (
-              <>
-                <div className="mb-4 w-full max-w-md">
-                  <label htmlFor="date" className="block text-left text-xl font-semibold mb-2">Date</label>
+                  <label htmlFor="end-date" className="block text-left text-xl font-semibold mb-2">End Date</label>
                   <input
-                    id="date"
+                    id="end-date"
                     type="date"
-                    name="date"
+                    name="end-date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                     className="w-full p-3 border border-gray-300 rounded"
                     required
                   />
                 </div>
 
                 <div className="mb-4 w-full max-w-md">
-                  <label htmlFor="time-slot" className="block text-left text-xl font-semibold mb-2">Select Time Slot</label>
-                  <select
-                    id="time-slot"
-                    name="time-slot"
-                    className="w-full p-3 border border-gray-300 rounded"
-                    required
-                  >
-                    <option value="08:00-10:00">08:00 AM - 10:00 AM</option>
-                    <option value="10:00-12:00">10:00 AM - 12:00 PM</option>
-                    <option value="12:00-02:00">12:00 PM - 02:00 PM</option>
-                    <option value="02:00-04:00">02:00 PM - 04:00 PM</option>
-                    <option value="04:00-06:00">04:00 PM - 06:00 PM</option>
-                  </select>
+                  <label className="block text-left text-xl font-semibold mb-2">Total Days</label>
+                  <p className="p-3 border border-gray-300 rounded">{numberOfDays} Day(s)</p>
                 </div>
+
+                <div className="mb-4 w-full max-w-md">
+                  <label className="block text-left text-xl font-semibold mb-2">Total Amount</label>
+                  <p className="p-3 border border-gray-300 rounded">₹{numberOfDays * dailyRate}</p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white py-2 px-6 rounded hover:bg-blue-700 text-lg"
+                >
+                  Book Now
+                </button>
+                <br />
+                <caption>You need to proceed to payments to confirm your bookings !!</caption>
               </>
             )}
-
-            <button
-              type="submit"
-              className="bg-blue-600 text-white py-2 px-6 rounded hover:bg-blue-700 text-lg"
-            >
-              Book Now
-            </button>
           </form>
         </div>
 
@@ -183,7 +159,7 @@ function Booking() {
               <p>Your booking has been successfully created.</p>
               <button
                 onClick={() => setNotificationVisible(false)}
-                className="mt-4 bg-blue-600 text-white py-2 px-6 rounded hover:bg-blue-700"
+                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
               >
                 Close
               </button>

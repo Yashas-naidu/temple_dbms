@@ -4,23 +4,28 @@ import "../App.css";
 import "../styles/loading.css";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "./authcontext";
-import myvideo from "../resources/lord.mp4"
+import myvideo from "../resources/lord.mp4";
 
 function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth(); // Access authentication state
+  const { isAuthenticated, setIsAuthenticated } = useAuth(); // Access authentication state
   const [isLoading, setIsLoading] = useState(false);
 
   const handleButtonClick = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
+      setIsAuthenticated(true); // Set authentication to true after sign-in
       navigate('/auth');
     }, 800);
   };
 
   const handleProfileClick = () => {
     navigate('/profile'); // Navigate to the profile endpoint
+  };
+
+  const handlePaymentClick = () => {
+    navigate('/payment'); // Navigate to the payment page
   };
 
   return (
@@ -35,8 +40,8 @@ function Navbar() {
           <Link to="contact" smooth={true} duration={1000} className="hover:underline cursor-pointer">Contact</Link>
         </div>
         <div className="space-x-4 flex items-center">
-          {/* Only show Sign In button if not authenticated */}
-          {!isAuthenticated && (
+          {/* Show Sign In button if not authenticated */}
+          {!isAuthenticated ? (
             <div style={{ display: 'inline-block', position: 'relative', width: '100px', height: '48px' }}>
               {isLoading ? (
                 <div className="spinner" style={{ display: 'inline-block', margin: 'auto' }}></div>
@@ -50,14 +55,23 @@ function Navbar() {
                 </button>
               )}
             </div>
+          ) : (
+            // Show Profile button and Payment button if authenticated
+            <>
+              <button
+                onClick={handleProfileClick}
+                className="bg-white text-blue-800 py-2 px-4 rounded hover:bg-gray-200 text-3xl"
+              >
+                Profile
+              </button>
+              <button
+                onClick={handlePaymentClick}
+                className="bg-white text-blue-800 py-2 px-4 rounded hover:bg-gray-200 text-3xl"
+              >
+                Payment
+              </button>
+            </>
           )}
-
-          <button
-            onClick={handleProfileClick} // Attach the click handler here
-            className="bg-white text-blue-800 py-2 px-4 rounded hover:bg-gray-200 text-3xl"
-          >
-            Profile
-          </button>
         </div>
       </nav>
 

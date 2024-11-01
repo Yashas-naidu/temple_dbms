@@ -83,18 +83,20 @@ app.post('/api/signin', (req, res) => {
 
 // Example route for bookings
 app.post('/api/bookings', (req, res) => {
-  const { temple, bookingType, serviceType, date, timeSlot } = req.body;
-  const query = 'INSERT INTO bookings (temple, bookingType, serviceType, date, timeSlot) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [temple, bookingType, serviceType, date, timeSlot], (err, result) => {
+  const { temple, bookingType, startDate, endDate, amount } = req.body;
+  
+  // Corrected SQL query with appropriate column names
+  const query = 'INSERT INTO bookings (temple, booking_type, start_date, end_date, amount) VALUES (?, ?, ?, ?, ?)';
+  
+  db.query(query, [temple, bookingType, startDate, endDate, amount], (err, result) => {
     if (err) {
-      console.error("Error creating booking:", err);
-      return res.status(500).send('Error creating booking');
+      console.error('Error inserting booking:', err);
+      return res.status(500).send('Internal server error');
     }
-    res.status(201).send('Booking created');
+    res.status(201).send('Booking created successfully');
   });
 });
 
-// Example route for donations
 app.post('/api/donations', (req, res) => {
   const { name, phone, address, donationType, donationAmount } = req.body;
   const query = 'INSERT INTO donations (name, phone, address, donationType, donationAmount) VALUES (?, ?, ?, ?, ?)';
@@ -103,6 +105,7 @@ app.post('/api/donations', (req, res) => {
     res.send('Donation received');
   });
 });
+
 
 // Event registration route
 app.post("/events", (req, res) => {
@@ -116,6 +119,23 @@ app.post("/events", (req, res) => {
       res.status(200).send("Event registration successful!");
   });
 });
+
+// New Payments Route
+app.post('/api/payments', (req, res) => {
+  const { user_id, payment_method } = req.body;
+  // Here you may want to include additional payment details (amount, transaction_id, etc.)
+  
+  const query = 'INSERT INTO payments (user_id, payment_method, payment_time) VALUES (?, ?, NOW())';
+  
+  db.query(query, [user_id, payment_method], (err, result) => {
+    if (err) {
+      console.error("Error processing payment:", err);
+      return res.status(500).send('Error processing payment');
+    }
+    res.status(201).send('Payment processed successfully');
+  });
+});
+
 
 // Endpoint to get the latest session
 app.get('/api/session/latest', (req, res) => {

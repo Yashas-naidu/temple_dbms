@@ -1,23 +1,28 @@
 import React, { useState } from "react";
 import "../App.css";
 import axios from "axios";
+import { useCart } from "./cartcontext";
 
 function Donation() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const { addToCart } = useCart(); // Destructure addToCart from context
 
   const handleDonationSubmit = async (e) => {
     e.preventDefault();
+    const donationAmount = parseFloat(e.target["donation-amount"].value); // Get donation amount
     const donationData = {
+      type: 'donation',
       name: e.target.name.value,
       phone: e.target.phone.value,
       address: e.target.address.value,
       donationType: e.target["donation-type"].value,
-      donationAmount: e.target["donation-amount"].value,
+      donationAmount, // Use the parsed donation amount
     };
 
     try {
       await axios.post("http://localhost:5000/api/donations", donationData);
+      addToCart(donationData); // Add to cart on successful submission
       setPopupMessage("Donation received successfully!");
       setShowPopup(true);
     } catch (error) {
@@ -29,7 +34,7 @@ function Donation() {
 
   const handleClosePopup = () => {
     setShowPopup(false);
-    setPopupMessage(""); // Clear message when closing
+    setPopupMessage("");
   };
 
   return (
@@ -116,6 +121,8 @@ function Donation() {
             >
               Donate Now
             </button>
+            <br />
+            <caption>You need to proceed to payments to confirm your Donations !!</caption>
           </form>
         </div>
       </div>

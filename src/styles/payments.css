@@ -1,0 +1,133 @@
+.payment-page {
+    display: flex;
+    max-width: 1200px;
+    margin: auto;
+    padding: 1.5rem;
+    font-family: Arial, sans-serif;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .payment-page.dark {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+  }
+  
+  .payment-page.light {
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  
+  .user-info {
+    flex: 1;
+    padding-right: 1rem;
+  }
+  
+  .user-info h2, .user-info p {
+    margin: 0.5rem 0;
+  }
+  
+  .user-info nav ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .user-info nav ul li {
+    margin: 0.5rem 0;
+  }
+  
+  .payment-section {
+    flex: 2;
+  }
+  
+  .theme-toggle {
+    margin-bottom: 1rem;
+  }
+  
+  .theme-toggle button {
+    background: none;
+    border: 1px solid currentColor;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+  }
+  
+  .theme-toggle button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .payments-template {
+    margin-bottom: 1rem;
+  }
+  
+  .template {
+    background: #f1f1f1;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .template h3 {
+    margin-top: 0;
+  }
+  
+  .payment-form label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .payment-form input,
+  .payment-form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .payment-form .error {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  .pay-now-button,
+  .save-template-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+  
+  .save-template-button {
+    background-color: #6c757d;
+  }
+  
+  .pay-now-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .save-template-button:hover {
+    background-color: #5a6268;
+  }
+  
+  .progress-bar {
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 10px;
+    margin-bottom: 1rem;
+  }
+  
+  .progress-bar > div {
+    background-color: #007bff;
+    height: 100%;
+    transition: width 0.3s;
+  }
+  
