@@ -30,7 +30,7 @@ function Navbar() {
 
   return (
     <div className="relative min-h-screen bg-blue-600 text-white">
-      <nav className="absolute top-0 left-0 w-full flex justify-between items-center p-6 z-10 bg-blue-600 bg-opacity-70">
+      <nav className="fixed top-0 left-0 w-full flex justify-between items-center p-6 z-10 bg-blue-600 bg-opacity-70">
         <div className="text-9xl font-bold">TempleTrek.com</div>
         <div className="space-x-4 text-3xl">
           <Link to="home" smooth={true} duration={1000} className="hover:underline cursor-pointer">Home</Link>

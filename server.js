@@ -245,6 +245,42 @@ app.post('/api/feedback', (req, res) => {
   });
 });
 
+app.put('/api/update-profile', (req, res) => {
+  const { field, value } = req.body;
+
+  // Query to get the user_id from the latest session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error updating profile');
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    const user_id = sessionResult[0].user_id;
+
+    // Dynamic update query for the specified field
+    const updateQuery = `UPDATE users SET ${field} = ? WHERE id = ?`;
+    db.query(updateQuery, [value, user_id], (err, result) => {
+      if (err) {
+        console.error("Error updating profile:", err);
+        return res.status(500).send('Error updating profile');
+      }
+      res.send('Profile updated successfully');
+    });
+  });
+});
+
+
 
 // Start server
 app.listen(port, () => {

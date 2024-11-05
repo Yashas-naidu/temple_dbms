@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserAlt, FaPhoneAlt, FaMapMarkerAlt, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
-import '../styles/TempleServicesDashboard.css';  // Import CSS for animations
-import axios from 'axios';  // Make sure to install axios
+import { FaUserAlt, FaPhoneAlt, FaMapMarkerAlt, FaEnvelope, FaPencilAlt } from 'react-icons/fa';
+import '../styles/TempleServicesDashboard.css';
+import axios from 'axios';
 
 const TempleServicesDashboard = () => {
   const [user, setUser] = useState({
-    name: '',
+    username: '',
     phone: '',
     address: '',
     email: '',
-    // serviceDate: ''
   });
 
   const [latestSession, setLatestSession] = useState(null);
+  const [isEditing, setIsEditing] = useState({}); // Track which fields are being edited
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,19 +22,35 @@ const TempleServicesDashboard = () => {
     }));
   };
 
+  const toggleEdit = (field) => {
+    setIsEditing((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field]
+    }));
+  };
+
+  const handleSave = async (field) => {
+    try {
+      await axios.put('http://localhost:5000/api/update-profile', {
+        field,
+        value: user[field]
+      });
+      toggleEdit(field);
+    } catch (error) {
+      console.error("Error updating user details:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchLatestSession = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/session/latest');
         setLatestSession(response.data);
-
-        // Fill user state with latest session details
         setUser({
-          name: response.data.username || '', // Set name from username
-          phone: response.data.phone || '', // Set phone from the API response
-          address: response.data.address || '', // Set address from the API response
-          email: response.data.email || '', // Set email from the API response
-          // serviceDate: new Date(response.data.sign_in_time).toISOString().split('T')[0] // Format the sign-in time for the date input
+          username: response.data.username || '',
+          phone: response.data.phone || '',
+          address: response.data.address || '',
+          email: response.data.email || '',
         });
       } catch (error) {
         console.error("Error fetching latest session:", error);
@@ -49,7 +65,6 @@ const TempleServicesDashboard = () => {
       <div className="w-full max-w-xl bg-white rounded-xl shadow-xl p-8 border border-blue-800 backdrop-blur-lg">
         <h2 className="text-3xl font-semibold text-blue-800 text-center mb-6">Temple Services Dashboard</h2>
 
-        {/* Render latest session data if available */}
         {latestSession && (
           <div className="mb-6 p-4 border border-blue-300 rounded-lg text-blue-800">
             <h3 className="text-lg font-semibold text-blue-800">Latest Session</h3>
@@ -59,75 +74,40 @@ const TempleServicesDashboard = () => {
         )}
 
         <form className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <FaUserAlt className="text-blue-700 text-2xl" />
-            <div className="w-full">
-              <label className="block text-blue-800 font-medium mb-1">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={user.name}
-                onChange={handleChange}
-                className="w-full border border-blue-400 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
-              />
+          {["username", "phone", "address", "email"].map((field) => (
+            <div key={field} className="flex items-center space-x-4">
+              {field === "username" && <FaUserAlt className="text-blue-700 text-2xl" />}
+              {field === "phone" && <FaPhoneAlt className="text-blue-700 text-2xl" />}
+              {field === "address" && <FaMapMarkerAlt className="text-blue-700 text-2xl" />}
+              {field === "email" && <FaEnvelope className="text-blue-700 text-2xl" />}
+              <div className="w-full">
+                <label className="block text-blue-800 font-medium mb-1 capitalize">{field}</label>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    name={field}
+                    value={user[field]}
+                    onChange={handleChange}
+                    disabled={!isEditing[field]}
+                    className={`w-full border ${isEditing[field] ? 'border-blue-600' : 'border-blue-400'} rounded-lg p-2 focus:outline-none text-black`}
+                  />
+                  <FaPencilAlt
+                    className="text-blue-600 ml-2 cursor-pointer"
+                    onClick={() => toggleEdit(field)}
+                  />
+                  {isEditing[field] && (
+                    <button
+                      type="button"
+                      onClick={() => handleSave(field)}
+                      className="ml-2 text-white bg-blue-600 px-3 py-1 rounded-lg"
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <FaPhoneAlt className="text-blue-700 text-2xl" />
-            <div className="w-full">
-              <label className="block text-blue-800 font-medium mb-1">Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={user.phone}
-                onChange={handleChange}
-                className="w-full border border-blue-400 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <FaMapMarkerAlt className="text-blue-700 text-2xl" />
-            <div className="w-full">
-              <label className="block text-blue-800 font-medium mb-1">Address</label>
-              <input
-                type="text"
-                name="address"
-                value={user.address}
-                onChange={handleChange}
-                className="w-full border border-blue-400 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <FaEnvelope className="text-blue-700 text-2xl" />
-            <div className="w-full">
-              <label className="block text-blue-800 font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={user.email}
-                onChange={handleChange}
-                className="w-full border border-blue-400 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
-              />
-            </div>
-          </div>
-
-          {/* <div className="flex items-center space-x-4">
-            <FaCalendarAlt className="text-blue-700 text-2xl" />
-            <div className="w-full">
-              <label className="block text-blue-800 font-medium mb-1">Service Date</label>
-              <input
-                type="date"
-                name="serviceDate"
-                value={user.serviceDate}
-                onChange={handleChange}
-                className="w-full border border-blue-400 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
-              />
-            </div>
-          </div>*/}
+          ))}
         </form>
       </div>
     </div>
