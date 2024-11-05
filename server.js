@@ -205,6 +205,45 @@ app.get('/api/session/latest', (req, res) => {
   });
 });
 
+app.post('/api/feedback', (req, res) => {
+  const { rating, comments } = req.body;
+
+  // Fetch user_id from the most recent session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error processing feedback');
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    // Retrieve user_id from the latest session result
+    const user_id = sessionResult[0].user_id;
+
+    // Insert feedback record with user_id from the latest session
+    const feedbackQuery = `
+      INSERT INTO feedback (user_id, rating, comments, timestamp) 
+      VALUES (?, ?, ?, NOW())
+    `;
+
+    db.query(feedbackQuery, [user_id, rating, comments], (err, feedbackResult) => {
+      if (err) {
+        console.error("Error submitting feedback:", err);
+        return res.status(500).send('Error submitting feedback');
+      }
+      res.status(201).send('Feedback submitted successfully');
+    });
+  });
+});
 
 
 // Start server
