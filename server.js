@@ -121,20 +121,64 @@ app.post("/events", (req, res) => {
 });
 
 // New Payments Route
+// app.post('/api/payments', (req, res) => {
+//   const { user_id, payment_method } = req.body;
+//   // Here you may want to include additional payment details (amount, transaction_id, etc.)
+  
+//   const query = 'INSERT INTO payments (user_id, payment_method, payment_time) VALUES (?, ?, NOW())';
+  
+//   db.query(query, [user_id, payment_method], (err, result) => {
+//     if (err) {
+//       console.error("Error processing payment:", err);
+//       return res.status(500).send('Error processing payment');
+//     }
+//     res.status(201).send('Payment processed successfully');
+//   });
+// });
+
 app.post('/api/payments', (req, res) => {
-  const { user_id, payment_method } = req.body;
-  // Here you may want to include additional payment details (amount, transaction_id, etc.)
-  
-  const query = 'INSERT INTO payments (user_id, payment_method, payment_time) VALUES (?, ?, NOW())';
-  
-  db.query(query, [user_id, payment_method], (err, result) => {
+  const { payment_method, totalAmount } = req.body;
+
+  // Query to get the user_id from the most recent session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
     if (err) {
-      console.error("Error processing payment:", err);
+      console.error("Error fetching latest session:", err);
       return res.status(500).send('Error processing payment');
     }
-    res.status(201).send('Payment processed successfully');
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    // Retrieve user_id from the latest session result
+    const user_id = sessionResult[0].user_id;
+
+    // Insert payment record with user_id from the latest session
+    const paymentQuery = `
+      INSERT INTO payments (user_id, payment_method, totalAmount, payment_time) 
+      VALUES (?, ?, ?, NOW())
+    `;
+
+    db.query(paymentQuery, [user_id, payment_method, totalAmount], (err, paymentResult) => {
+      if (err) {
+        console.error("Error processing payment:", err);
+        return res.status(500).send('Error processing payment');
+      }
+      res.status(201).send('Payment processed successfully');
+    });
   });
 });
+
+
+
+
 
 
 // Endpoint to get the latest session

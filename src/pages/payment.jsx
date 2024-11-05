@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCart } from "../components/cartcontext";
 
 function Payment() {
   const { cartItems, clearCart } = useCart();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("Card"); // Default payment method
+  const [paymentStatus, setPaymentStatus] = useState(""); // Track payment status message
 
   // Calculate total amount from cart items
   const totalAmount = cartItems.reduce((total, item) => {
@@ -11,11 +14,36 @@ function Payment() {
     return total + donationAmount + bookingAmount;
   }, 0);
 
-  const handlePayment = async () => {
-    // Here you might want to call your payment API
-    alert(`Proceeding with payment of ₹${totalAmount}`);
-    // Clear the cart after payment processing
-    clearCart();
+  const handlePaymentClick = () => {
+    setShowConfirm(true); // Show the confirmation modal
+  };
+
+  const confirmPayment = async () => {
+    try {
+      // Assuming you have user_id available from context or state
+      const user_id = 1; // Replace with the actual logged-in user id
+      const response = await fetch("http://localhost:5000/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id, payment_method: paymentMethod, totalAmount })
+      });
+
+      if (response.ok) {
+        setPaymentStatus("Payment successful!");
+        clearCart(); // Clear the cart after successful payment
+
+        // Hide success message and close modal after 3 seconds
+        setTimeout(() => {
+          setPaymentStatus("");
+          setShowConfirm(false);
+        }, 1000);
+      } else {
+        setPaymentStatus("Payment failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      setPaymentStatus("An error occurred during payment.");
+    }
   };
 
   return (
@@ -28,17 +56,52 @@ function Payment() {
             <li key={index} className="border-b py-4">
               <h4 className="text-xl font-semibold">{item.type === 'donation' ? 'Donation' : 'Booking'}</h4>
               <p>Details: {item.donationType || item.bookingType}</p>
-              <p>Amount: ₹{item.donationAmount || item.amount || "N/A"}</p> {/* Use item.amount for bookings */}
+              <p>Amount: ₹{item.donationAmount || item.amount || "N/A"}</p>
             </li>
           ))}
         </ul>
         <p className="text-2xl font-bold mt-4">Total: ₹{totalAmount}</p>
         <button
-          onClick={handlePayment}
+          onClick={handlePaymentClick}
           className="mt-6 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
           Proceed to Payment
         </button>
+
+        {showConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-md text-center w-96">
+              {paymentStatus ? (
+                <p className="text-xl text-green-600 mb-4">{paymentStatus}</p>
+              ) : (
+                <>
+                  <p className="text-xl mb-4">Confirm Payment of ₹{totalAmount}?</p>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="mb-4 border rounded p-2 w-full"
+                  >
+                    <option value="Card">Card</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Netbanking">Netbanking</option>
+                  </select>
+                  <button
+                    onClick={confirmPayment}
+                    className="bg-green-500 text-white py-2 px-4 rounded mr-2 hover:bg-green-600"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
