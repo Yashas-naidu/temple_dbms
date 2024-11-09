@@ -64,12 +64,12 @@ function Navbar() {
               >
                 Profile
               </button>
-              <button
+              {/* <button
                 onClick={handlePaymentClick}
                 className="bg-white text-blue-800 py-2 px-4 rounded hover:bg-gray-200 text-3xl"
               >
                 Payment
-              </button>
+              </button> */}
             </>
           )}
         </div>

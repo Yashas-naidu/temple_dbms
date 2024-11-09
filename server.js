@@ -15,12 +15,100 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: 'yashashsn',  // Replace with your MySQL password
-  database: 'templetrek'  // Replace with your MySQL database name
+  database: 'temple'  // Replace with your MySQL database name
 });
 
 db.connect((err) => {
   if (err) throw err;
   console.log('Connected to MySQL database');
+});
+
+// Endpoint to fetch events for the current user
+// Endpoint to fetch events for the current user
+app.get('/api/events/user', (req, res) => {
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error fetching session data');
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    const user_id = sessionResult[0].user_id;
+
+    const eventsQuery = `
+      SELECT events.event, events.numberOfAttendees
+      FROM events
+      JOIN session ON events.user_id = session.user_id
+      WHERE session.user_id = ?
+    `;
+
+    db.query(eventsQuery, [user_id], (err, eventsResult) => {
+      if (err) {
+        console.error("Error fetching events:", err);
+        return res.status(500).send('Error fetching events data');
+      }
+
+      if (eventsResult.length === 0) {
+        return res.status(404).send('No events found for the user');
+      }
+
+      res.json(eventsResult); // Return events data to the frontend
+    });
+  });
+});
+
+
+
+// Fetch bookings and donations for the current user
+app.get('/api/user-details', (req, res) => {
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error fetching session data');
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    const user_id = sessionResult[0].user_id;
+
+    const bookingsQuery = `SELECT * FROM bookings WHERE user_id = ?`;
+    const donationsQuery = `SELECT * FROM donations WHERE user_id = ?`;
+
+    db.query(bookingsQuery, [user_id], (err, bookingsResult) => {
+      if (err) {
+        console.error("Error fetching bookings:", err);
+        return res.status(500).send('Error fetching bookings data');
+      }
+
+      db.query(donationsQuery, [user_id], (err, donationsResult) => {
+        if (err) {
+          console.error("Error fetching donations:", err);
+          return res.status(500).send('Error fetching donations data');
+        }
+
+        res.json({ bookings: bookingsResult, donations: donationsResult });
+      });
+    });
+  });
 });
 
 // SIGN UP route
