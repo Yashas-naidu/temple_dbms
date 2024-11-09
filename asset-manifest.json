@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/temple_dbms/static/css/main.b9f5f911.css",
+    "main.js": "/temple_dbms/static/js/main.2a9b6280.js",
+    "static/js/453.62a866e9.chunk.js": "/temple_dbms/static/js/453.62a866e9.chunk.js",
+    "static/media/lord.mp4": "/temple_dbms/static/media/lord.372c0cd93dac2419fbb0.mp4",
+    "static/media/bebas-neue-latin-400-normal.woff2": "/temple_dbms/static/media/bebas-neue-latin-400-normal.4352f3c0f3586c850c24.woff2",
+    "static/media/bebas-neue-latin-400-normal.woff": "/temple_dbms/static/media/bebas-neue-latin-400-normal.35d44c0962992ff863c1.woff",
+    "static/media/bebas-neue-latin-ext-400-normal.woff2": "/temple_dbms/static/media/bebas-neue-latin-ext-400-normal.99be330d826b8dba922c.woff2",
+    "static/media/bebas-neue-latin-ext-400-normal.woff": "/temple_dbms/static/media/bebas-neue-latin-ext-400-normal.40ecee6e5fd01923295f.woff",
+    "index.html": "/temple_dbms/index.html",
+    "main.b9f5f911.css.map": "/temple_dbms/static/css/main.b9f5f911.css.map",
+    "main.2a9b6280.js.map": "/temple_dbms/static/js/main.2a9b6280.js.map",
+    "453.62a866e9.chunk.js.map": "/temple_dbms/static/js/453.62a866e9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b9f5f911.css",
+    "static/js/main.2a9b6280.js"
+  ]
+}
