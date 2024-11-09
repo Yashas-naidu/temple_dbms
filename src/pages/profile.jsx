@@ -49,6 +49,18 @@ const TempleServicesDashboard = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      const confirmation = window.confirm("Are you sure you want to delete your account? This action is irreversible.");
+      if (confirmation) {
+        await axios.delete('http://localhost:5000/api/delete-account');
+        navigate('/auth'); // Redirect to the login page or home page after deletion
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchLatestSessionAndDetails = async () => {
       try {
@@ -67,10 +79,10 @@ const TempleServicesDashboard = () => {
         setDonations(userDetailsResponse.data.donations);
 
         const eventsResponse = await axios.get('http://localhost:5000/api/events/user');
-      const uniqueEvents = Array.from(new Set(eventsResponse.data.map(e => e.event))).map(event => {
-        return eventsResponse.data.find(e => e.event === event);
-      });
-      setEvents(uniqueEvents);
+        const uniqueEvents = Array.from(new Set(eventsResponse.data.map(e => e.event))).map(event => {
+          return eventsResponse.data.find(e => e.event === event);
+        });
+        setEvents(uniqueEvents);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -85,11 +97,11 @@ const TempleServicesDashboard = () => {
         <h2 className="text-3xl font-semibold text-blue-800 text-center mb-6">Temple Services Dashboard</h2>
         <div className="flex items-center justify-end w-full mb-4">
           <button
-        onClick={handlesignout}
-    className="bg-white text-blue-800 mx-2 py-2 px-4 rounded hover:bg-gray-200 text-2xl border border-blue-800">
-    Sign out
-  </button>
-</div>
+            onClick={handlesignout}
+            className="bg-white text-blue-800 mx-2 py-2 px-4 rounded hover:bg-gray-200 text-2xl border border-blue-800">
+            Sign out
+          </button>
+        </div>
         {/* Profile Form */}
         <form className="space-y-6">
           {["username", "phone", "address", "email"].map((field) => (
@@ -169,12 +181,23 @@ const TempleServicesDashboard = () => {
             events.map((event, index) => (
               <div key={index} className="mt-4 p-4 border border-blue-300 rounded-lg">
                 <p><strong>Event:</strong> {event.event}</p>
-                <p><strong>Number of Attendees:</strong> {event.numberOfAttendees}</p>
+                <p><strong>numberOfAttendees:</strong> {event.numberOfAttendees}</p>
+    
               </div>
             ))
           ) : (
             <p className="mt-4 text-blue-800">No events found.</p>
           )}
+        </div>
+
+        {/* Delete Account Button */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={handleDeleteAccount}
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700"
+          >
+            Delete Account
+          </button>
         </div>
       </div>
     </div>

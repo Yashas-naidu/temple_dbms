@@ -144,8 +144,8 @@ function Booking() {
                 >
                   Book Now
                 </button>
-                <br />
-                <caption>You need to proceed to payments to confirm your bookings !!</caption>
+                {/* <br /> */}
+                {/* <caption>You need to proceed to payments to confirm your bookings !!</caption> */}
               </>
             )}
           </form>

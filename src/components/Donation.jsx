@@ -121,8 +121,8 @@ function Donation() {
             >
               Donate Now
             </button>
-            <br />
-            <caption>You need to proceed to payments to confirm your Donations !!</caption>
+            {/* <br /> */}
+            {/* <caption>You need to proceed to payments to confirm your Donations !!</caption> */}
           </form>
         </div>
       </div>

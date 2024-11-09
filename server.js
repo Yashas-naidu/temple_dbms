@@ -23,6 +23,33 @@ db.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
+app.delete('/api/delete-account', (req, res) => {
+  // Fetch the latest session details
+  const sessionQuery = 'SELECT user_id FROM session ORDER BY sign_in_time DESC LIMIT 1'; // Adjust the query based on your table structure
+  db.query(sessionQuery, (err, result) => {
+    if (err) {
+      console.error('Error fetching session:', err);
+      return res.status(500).json({ message: 'Failed to retrieve session data' });
+    }
+    
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'No active session found' });
+    }
+
+    const userId = result[0].user_id; // Get the latest user_id from the session
+
+    // Proceed to delete the user
+    const deleteUserQuery = 'DELETE FROM users WHERE id = ?';
+    db.query(deleteUserQuery, [userId], (err, deleteResult) => {
+      if (err) {
+        console.error('Error deleting user:', err);
+        return res.status(500).json({ message: 'Failed to delete account' });
+      }
+      res.status(200).json({ message: 'Account deleted successfully' });
+    });
+  });
+});
+
 // Endpoint to fetch events for the current user
 // Endpoint to fetch events for the current user
 app.get('/api/events/user', (req, res) => {
