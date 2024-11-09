@@ -82,43 +82,127 @@ app.post('/api/signin', (req, res) => {
 });
 
 // Example route for bookings
+// Booking route with user_id from the latest session
 app.post('/api/bookings', (req, res) => {
   const { temple, bookingType, startDate, endDate, amount } = req.body;
-  
-  // Corrected SQL query with appropriate column names
-  const query = 'INSERT INTO bookings (temple, booking_type, start_date, end_date, amount) VALUES (?, ?, ?, ?, ?)';
-  
-  db.query(query, [temple, bookingType, startDate, endDate, amount], (err, result) => {
+
+  // Query to get the user_id from the most recent session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
     if (err) {
-      console.error('Error inserting booking:', err);
-      return res.status(500).send('Internal server error');
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error creating booking');
     }
-    res.status(201).send('Booking created successfully');
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    // Retrieve user_id from the latest session result
+    const user_id = sessionResult[0].user_id;
+
+    // Insert booking record with user_id from the latest session
+    const bookingQuery = `
+      INSERT INTO bookings (user_id, temple, booking_type, start_date, end_date, amount) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(bookingQuery, [user_id, temple, bookingType, startDate, endDate, amount], (err, result) => {
+      if (err) {
+        console.error("Error inserting booking:", err);
+        return res.status(500).send('Internal server error');
+      }
+      res.status(201).send('Booking created successfully');
+    });
   });
 });
 
+
 app.post('/api/donations', (req, res) => {
   const { name, phone, address, donationType, donationAmount } = req.body;
-  const query = 'INSERT INTO donations (name, phone, address, donationType, donationAmount) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [name, phone, address, donationType, donationAmount], (err, result) => {
-    if (err) throw err;
-    res.send('Donation received');
+
+  // Get user_id from the latest session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send('Error fetching session data');
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send('No active session found. Please sign in.');
+    }
+
+    const user_id = sessionResult[0].user_id;
+
+    // Insert donation record with user_id from the latest session
+    const query = 'INSERT INTO donations (user_id, name, phone, address, donationType, donationAmount) VALUES (?, ?, ?, ?, ?, ?)';
+
+    db.query(query, [user_id, name, phone, address, donationType, donationAmount], (err, result) => {
+      if (err) {
+        console.error("Error inserting donation:", err);
+        return res.status(500).send('Internal server error');
+      }
+      res.status(201).send('Donation received');
+    });
   });
 });
 
 
 // Event registration route
+// Event registration route with user_id from latest session
 app.post("/events", (req, res) => {
   const { event, numberOfAttendees } = req.body;
-  const query = "INSERT INTO events (event, numberOfAttendees) VALUES (?, ?)";
-  db.query(query, [event, numberOfAttendees], (err, result) => {
+
+  // Query to get the user_id from the most recent session
+  const latestSessionQuery = `
+    SELECT user_id
+    FROM session
+    ORDER BY sign_in_time DESC
+    LIMIT 1
+  `;
+
+  db.query(latestSessionQuery, (err, sessionResult) => {
+    if (err) {
+      console.error("Error fetching latest session:", err);
+      return res.status(500).send("Error registering event");
+    }
+
+    if (sessionResult.length === 0) {
+      return res.status(404).send("No active session found. Please sign in.");
+    }
+
+    // Retrieve user_id from the latest session result
+    const user_id = sessionResult[0].user_id;
+
+    // Insert event record with user_id from the latest session
+    const eventQuery = `
+      INSERT INTO events (user_id, event, numberOfAttendees) 
+      VALUES (?, ?, ?)
+    `;
+
+    db.query(eventQuery, [user_id, event, numberOfAttendees], (err, result) => {
       if (err) {
-          console.error("Error inserting data: ", err);
-          return res.status(500).send("Error inserting data");
+        console.error("Error inserting event data:", err);
+        return res.status(500).send("Error registering event");
       }
-      res.status(200).send("Event registration successful!");
+      res.status(201).send("Event registration successful!");
+    });
   });
 });
+
 
 // New Payments Route
 // app.post('/api/payments', (req, res) => {
