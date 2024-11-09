@@ -24,8 +24,7 @@ db.connect((err) => {
 });
 
 app.delete('/api/delete-account', (req, res) => {
-  // Fetch the latest session details
-  const sessionQuery = 'SELECT user_id FROM session ORDER BY sign_in_time DESC LIMIT 1'; // Adjust the query based on your table structure
+  const sessionQuery = 'SELECT user_id FROM session ORDER BY sign_in_time DESC LIMIT 1';
   db.query(sessionQuery, (err, result) => {
     if (err) {
       console.error('Error fetching session:', err);
@@ -38,7 +37,6 @@ app.delete('/api/delete-account', (req, res) => {
 
     const userId = result[0].user_id; // Get the latest user_id from the session
 
-    // Proceed to delete the user
     const deleteUserQuery = 'DELETE FROM users WHERE id = ?';
     db.query(deleteUserQuery, [userId], (err, deleteResult) => {
       if (err) {
@@ -49,6 +47,7 @@ app.delete('/api/delete-account', (req, res) => {
     });
   });
 });
+
 
 // Endpoint to fetch events for the current user
 // Endpoint to fetch events for the current user
