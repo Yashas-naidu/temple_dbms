@@ -14,7 +14,7 @@ function App() {
         <Router>
           <div className="relative min-h-screen bg-blue-600 text-white">
             <Routes>
-              <Route path="/home" element={<LandingPage />} />
+              <Route path="/temple_dbms" element={<LandingPage />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<ProfileDashboard />} />
               <Route path="/payment" element={<PaymentPage />} />
